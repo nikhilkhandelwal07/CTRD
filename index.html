@@ -1,0 +1,529 @@
+<title>Palamalai Milk Slip</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Noto+Sans:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Malayalam:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap">
+<style>
+/* Layout: one column; tab bar picks one of three screens (phone call, collection point, dashboard). Phone screen is a basic keypad phone, because that is what farmers carry. */
+:root {
+  --bg: #f3f6f4;          /* milk white, slight leaf tint */
+  --surface: #ffffff;
+  --ink: #16302a;         /* deep coffee-leaf green */
+  --muted: #5b6f69;
+  --line: #d6e0dc;
+  --accent: #c97d00;      /* marigold */
+  --accent-soft: #fbefd6;
+  --leaf: #2f6b57;
+  --good: #2e7d4f; --ok: #b07a00; --low: #b3412e;
+  --phone: #23302c; --screen: #dfe8c9; --screen-ink: #1f2a14;
+  --f-display: "Baloo 2", "Noto Sans", system-ui, sans-serif;
+  --f-body: "Noto Sans", "Noto Sans Tamil", "Noto Sans Malayalam", "Noto Sans Devanagari", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1916; --surface: #17241f; --ink: #e4eeea; --muted: #9db2ab; --line: #2a3c35;
+  --accent: #f0b443; --accent-soft: #3a2e14; --leaf: #7cc3a7;
+  --good: #6fcf97; --ok: #f0b443; --low: #f08a76;
+  --phone: #0a0f0d; --screen: #c9d6ad; --screen-ink: #1a2410; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1916; --surface: #17241f; --ink: #e4eeea; --muted: #9db2ab; --line: #2a3c35;
+  --accent: #f0b443; --accent-soft: #3a2e14; --leaf: #7cc3a7;
+  --good: #6fcf97; --ok: #f0b443; --low: #f08a76;
+  --phone: #0a0f0d; --screen: #c9d6ad; --screen-ink: #1a2410; color-scheme: dark }
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px }
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.15; margin: 0; text-wrap: balance }
+h1 { font-size: 30px } h2 { font-size: 21px } h3 { font-size: 17px }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 16px }
+header p { margin: 2px 0 0; color: var(--muted); max-width: 60ch }
+.badge { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; background: var(--accent-soft); color: var(--ink); border: 1px solid var(--accent); padding: 4px 10px; border-radius: 999px; white-space: nowrap }
+.tabs { display: flex; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px; overflow-x: auto }
+.tab { flex: 1 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; background: transparent; color: var(--ink); font: 600 15px var(--f-body); padding: 10px 14px; border-radius: 10px; cursor: pointer; min-height: 48px }
+.tab svg { width: 22px; height: 22px }
+.tab[aria-selected="true"] { background: var(--leaf); color: var(--bg) }
+.tab:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px }
+.panel { display: grid; gap: 16px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px }
+.muted { color: var(--muted) }
+.small { font-size: 13px }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center }
+select, input[type=number] { font: 600 15px var(--f-body); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px }
+label.field { display: grid; gap: 4px; font-size: 13px; color: var(--muted) }
+.btn { border: 0; border-radius: 12px; font: 700 16px var(--f-body); padding: 12px 18px; min-height: 52px; cursor: pointer; background: var(--leaf); color: var(--bg); display: inline-flex; align-items: center; gap: 8px }
+.btn.alt { background: var(--accent-soft); color: var(--ink); border: 1px solid var(--accent) }
+.btn:disabled { opacity: .45; cursor: not-allowed }
+
+/* ---------- Phone ---------- */
+.call-grid { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 16px; align-items: start }
+@media (max-width: 760px) { .call-grid { grid-template-columns: 1fr } }
+.phone { background: var(--phone); border-radius: 36px 36px 44px 44px; padding: 22px 18px 24px; width: 100%; max-width: 300px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,.25) }
+.speaker { width: 60px; height: 6px; border-radius: 3px; background: #4a5a55; margin: 0 auto 14px }
+.screen { background: var(--screen); color: var(--screen-ink); border-radius: 8px; min-height: 196px; padding: 12px; display: flex; flex-direction: column; gap: 6px; font-family: var(--f-body) }
+.screen .status { font: 700 13px var(--f-body); display: flex; justify-content: space-between; opacity: .8 }
+.screen .big { font: 700 20px var(--f-display); line-height: 1.2 }
+.screen .cap { font-size: 15px; line-height: 1.45 }
+.screen .en { font-size: 12px; opacity: .75; line-height: 1.4 }
+.ringing .big { animation: pulse 1s ease-in-out infinite }
+@keyframes pulse { 50% { opacity: .35 } }
+@media (prefers-reduced-motion: reduce) { .ringing .big { animation: none } }
+.keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px }
+.key { background: #3a4a45; color: #f1f5f3; border: 0; border-radius: 14px; font: 700 20px var(--f-body); min-height: 46px; cursor: pointer; display: grid; place-items: center }
+.key.hot { box-shadow: 0 0 0 3px var(--accent) }
+.key.green { background: #2e8b57 } .key.red { background: #c0392b }
+.key svg { width: 24px; height: 24px }
+.slipcard { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px }
+.tile { border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 4px; justify-items: start }
+.tile svg { width: 34px; height: 34px; color: var(--leaf) }
+.tile .v { font: 700 24px var(--f-display); font-variant-numeric: tabular-nums }
+.tile .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em }
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 4px }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid currentColor }
+.chip.good { color: var(--good) } .chip.ok { color: var(--ok) } .chip.low { color: var(--low) }
+
+/* ---------- Collection ---------- */
+.farmers { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px }
+.farmer { border: 2px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 14px; padding: 10px 6px; cursor: pointer; display: grid; justify-items: center; gap: 4px; font: 600 14px var(--f-body); min-height: 96px }
+.farmer .av { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font: 700 17px var(--f-display); color: #fff }
+.farmer[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft) }
+.farmer .done { font-size: 11px; color: var(--good) }
+.entry { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px }
+.stepper { display: grid; gap: 6px }
+.stepper .lbl { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px }
+.stepper .ctl { display: grid; grid-template-columns: 52px 1fr 52px; gap: 6px; align-items: center }
+.stepper button { min-height: 52px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); font: 700 24px var(--f-body); cursor: pointer }
+.stepper output { text-align: center; font: 700 28px var(--f-display); font-variant-numeric: tabular-nums }
+.preview { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; font-variant-numeric: tabular-nums }
+.preview strong { font: 700 26px var(--f-display) }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 600; max-width: calc(100% - 32px); z-index: 20 }
+
+/* ---------- Dashboard ---------- */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 2px }
+.kpi .v { font: 700 28px var(--f-display); font-variant-numeric: tabular-nums }
+.kpi .l { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted) }
+.kpi .s { font-size: 13px; color: var(--muted) }
+.scroll { overflow-x: auto }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; min-width: 560px }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 14px }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600 }
+td.n, th.n { text-align: right }
+.two { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 16px }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr } }
+svg.chart text { fill: var(--muted); font: 11px var(--f-body) }
+.list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px }
+.list li { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 6px }
+footer { color: var(--muted); font-size: 13px; max-width: 75ch }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Palamalai Milk Slip</h1>
+      <p>A voice slip for every pour of milk: the farmer hears litres, quality and money due on any phone, in Tamil, Malayalam, Hindi or English. CTRD sees everything on one dashboard.</p>
+    </div>
+    <span class="badge">Prototype · sample data</span>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Screens">
+    <button class="tab" role="tab" id="t-call" aria-controls="p-call" aria-selected="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/></svg>Farmer's phone</button>
+    <button class="tab" role="tab" id="t-collect" aria-controls="p-collect" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3h8l-1 4v2l2 3v9H7v-9l2-3V7z"/><path d="M7 14h10"/></svg>Collection point</button>
+    <button class="tab" role="tab" id="t-dash" aria-controls="p-dash" aria-selected="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Dashboard</button>
+  </nav>
+
+  <!-- ================= PHONE ================= -->
+  <section class="panel" id="p-call" role="tabpanel" aria-labelledby="t-call">
+    <div class="call-grid">
+      <div>
+        <div class="phone" id="phone">
+          <div class="speaker"></div>
+          <div class="screen" id="screen" aria-live="polite"></div>
+          <div class="keys" id="keys"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="card panel">
+          <div class="row">
+            <label class="field" for="who">Whose phone?
+              <select id="who"></select></label>
+            <button class="btn alt" id="missed" type="button">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3.1 4.2 2 2 0 0 1 5.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L9 9.9a16 16 0 0 0 5.1 5.1l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/><path d="M15 3l6 6M21 3l-6 6"/></svg>
+              Give a missed call</button>
+          </div>
+          <div>
+            <h3>How it works for the farmer</h3>
+            <ol class="steps small">
+              <li>After milk is poured, the farmer's phone rings. They press the green key and hear the slip in their language.</li>
+              <li>Any time, they can give a free missed call. The dairy calls back, asks for a language (1 Tamil, 2 Malayalam, 3 Hindi, 4 English) and reads their total.</li>
+              <li>No reading is needed. Press 1 to hear again, 2 to hear the total.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="card panel">
+          <div class="row" style="justify-content:space-between">
+            <h3>What the farmer hears</h3>
+            <span class="small muted" id="slipwhen"></span>
+          </div>
+          <div class="slipcard" id="slipcard"></div>
+          <p class="small muted" id="voicenote">Voice uses this device's built-in speech. If a language has no voice installed, the words still show on the phone screen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= COLLECTION ================= -->
+  <section class="panel" id="p-collect" role="tabpanel" aria-labelledby="t-collect" hidden>
+    <div class="card panel">
+      <div class="row" style="justify-content:space-between">
+        <h2>Record milk</h2>
+        <div class="row">
+          <label class="field" for="village">Village
+            <select id="village"></select></label>
+          <label class="field" for="session">Session
+            <select id="session"><option value="AM">Morning</option><option value="PM">Evening</option></select></label>
+        </div>
+      </div>
+      <p class="small muted">1. Tap the farmer &nbsp; 2. Set litres, fat and SNF from the tester &nbsp; 3. Save. The farmer gets a voice call straight away.</p>
+      <div class="farmers" id="farmers" role="group" aria-label="Farmers"></div>
+    </div>
+    <div class="card panel" id="entrycard">
+      <div class="entry">
+        <div class="stepper"><span class="lbl">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3h8l-1 4v2l2 3v9H7v-9l2-3V7z"/></svg>Litres</span>
+          <div class="ctl"><button type="button" data-k="litres" data-d="-0.5" aria-label="Less milk">−</button><output id="o-litres">2.0</output><button type="button" data-k="litres" data-d="0.5" aria-label="More milk">+</button></div></div>
+        <div class="stepper"><span class="lbl">Fat %</span>
+          <div class="ctl"><button type="button" data-k="fat" data-d="-0.1" aria-label="Lower fat">−</button><output id="o-fat">4.0</output><button type="button" data-k="fat" data-d="0.1" aria-label="Higher fat">+</button></div></div>
+        <div class="stepper"><span class="lbl">SNF % (solids-not-fat)</span>
+          <div class="ctl"><button type="button" data-k="snf" data-d="-0.1" aria-label="Lower SNF">−</button><output id="o-snf">8.5</output><button type="button" data-k="snf" data-d="0.1" aria-label="Higher SNF">+</button></div></div>
+      </div>
+      <div class="preview" id="preview"></div>
+      <div class="row">
+        <button class="btn" id="save" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+          Save and send voice slip</button>
+        <span class="small muted" id="pick">Tap a farmer first.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DASHBOARD ================= -->
+  <section class="panel" id="p-dash" role="tabpanel" aria-labelledby="t-dash" hidden>
+    <div class="kpis" id="kpis"></div>
+    <div class="two">
+      <div class="card panel">
+        <div class="row" style="justify-content:space-between"><h3>Milk collected per day</h3><span class="small muted">litres, all villages</span></div>
+        <div id="chart"></div>
+        <p class="small muted">Dashed lines: our estimates for the full seven villages (low 170, base 320, high 530 litres a day). The sample shows a 21-farmer pilot.</p>
+      </div>
+      <div class="card panel">
+        <h3>Needs attention</h3>
+        <ul class="list small" id="attention"></ul>
+      </div>
+    </div>
+    <div class="card panel">
+      <h3>Villages, last 7 days</h3>
+      <div class="scroll"><table id="vtable"></table></div>
+    </div>
+    <div class="two">
+      <div class="card panel">
+        <h3>Payments</h3>
+        <div class="scroll"><table id="ptable"></table></div>
+      </div>
+      <div class="card panel">
+        <h3>Price rule (sample)</h3>
+        <p class="small muted">To be set from the dairy cost model (DPR-05). Change it here to see every amount update.</p>
+        <div class="row">
+          <label class="field" for="base">Rs per litre at 4.0% fat, 8.5% SNF
+            <input id="base" type="number" min="20" max="200" step="1" value="100"></label>
+        </div>
+        <p class="small">Plus or minus Rs 1 for every 0.1% fat, and Rs 0.50 for every 0.1% SNF, above or below that level.</p>
+        <p class="small"><span class="chip good">Good</span> fat 4.0%+ and SNF 8.5%+ &nbsp; <span class="chip ok">Fair</span> fat 3.5%+ and SNF 8.0%+ &nbsp; <span class="chip low">Low</span> below that</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>Prototype for CTRD Trust by the SPJIMR DoCC team (Anjit Jain, Rohan Raj, Nikhil Khandelwal), October 2026. Farmers, numbers and the helpline are sample data; no real phone calls are made. Tamil, Malayalam and Hindi wording to be checked by native speakers at CTRD.</footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  // ---------- Sample data ----------
+  const VILLAGES = ["Pasumani", "Pasumanipudur", "Manguzhi", "Kunjurpathy", "Perumpathy", "Perukaipathy 1", "Perukaipathy 2"];
+  const NAMES = [["Lakshmi","ta"],["Murugan","ta"],["Selvi","ml"],["Ravi","ta"],["Kamala","ml"],["Mani","ta"],["Saroja","ta"],
+    ["Velu","ta"],["Chellamma","ml"],["Raju","hi"],["Pappathi","ta"],["Kumar","ta"],["Valli","ml"],["Sundaram","ta"],
+    ["Ponni","ta"],["Arjun","en"],["Meena","ml"],["Kannan","ta"],["Rani","ta"],["Bala","ml"],["Devi","ta"]];
+  const COLORS = ["#2f6b57","#c97d00","#7a4e9e","#b3412e","#1f6f8b","#6b7a1f","#8b5a2b"];
+  const farmers = NAMES.map(([name, lang], i) => ({ id: i, name, lang, village: VILLAGES[i % 7], cows: 1 + (i * 7) % 3 }));
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const TODAY = "2026-10-24";
+  const days = []; for (let d = 11; d <= 24; d++) days.push(`2026-10-${String(d).padStart(2, "0")}`);
+  const records = [];
+  const stopped = new Set([4, 13]);           // two farmers who stopped (sample)
+  for (const day of days) for (const s of ["AM", "PM"]) {
+    if (day === TODAY && s === "PM") continue;
+    for (const f of farmers) {
+      const dnum = +day.slice(8);
+      if (stopped.has(f.id) && dnum >= 21) continue;
+      if (day === TODAY && f.id % 3 === 0) continue;   // not yet poured this morning
+      if (rnd() < 0.08) continue;
+      const litres = Math.max(0.5, Math.round((f.cows * (s === "AM" ? 1.1 : 0.8) + (rnd() - 0.5)) * 2) / 2);
+      const fat = Math.round((3.4 + rnd() * 1.2 + (f.village === "Manguzhi" ? -0.3 : 0)) * 10) / 10;
+      const snf = Math.round((7.9 + rnd() * 0.9) * 10) / 10;
+      const r = rnd(); const call = r < 0.82 ? "answered" : r < 0.95 ? "missed" : "no answer";
+      records.push({ day, s, fid: f.id, litres, fat, snf, call });
+    }
+  }
+  const PERIODS = [{ key: "p1", label: "11 to 20 Oct", from: 11, to: 20, pay: "20 Oct", paid: true },
+                   { key: "p2", label: "21 to 31 Oct", from: 21, to: 31, pay: "31 Oct", paid: false }];
+  const unpaidLast = new Set([6, 17]);        // sample: two farmers not yet paid for last period
+
+  // ---------- Price rule ----------
+  let BASE = 100;
+  const rate = (fat, snf) => Math.max(0, Math.round((BASE + (fat - 4.0) * 10 * 1 + (snf - 8.5) * 10 * 0.5) * 2) / 2);
+  const quality = (fat, snf) => fat >= 4.0 && snf >= 8.5 ? "good" : fat >= 3.5 && snf >= 8.0 ? "ok" : "low";
+  const amount = r => Math.round(r.litres * rate(r.fat, r.snf));
+  const periodOf = day => +day.slice(8) <= 20 ? PERIODS[0] : PERIODS[1];
+  const totalFor = (fid, p) => records.filter(r => r.fid === fid && periodOf(r.day) === p).reduce((a, r) => a + amount(r), 0);
+  const rs = n => "Rs " + Math.round(n).toLocaleString("en-IN");
+
+  // ---------- Words ----------
+  const L = {
+    ta: { voice: "ta-IN", am: "காலை", pm: "மாலை", q: { good: "நல்லது", ok: "சரி", low: "குறைவு" }, month: "அக்டோபர்",
+      slip: (o) => `வணக்கம் ${o.name}. இன்று ${o.sess} நீங்கள் ${o.l} லிட்டர் பால் கொடுத்தீர்கள். தரம் ${o.q}. இன்றைய தொகை ${o.a} ரூபாய். இந்த காலத்தில் மொத்தம் ${o.t} ரூபாய். பணம் ${o.month} ${o.d} அன்று. மீண்டும் கேட்க 1 அழுத்தவும். மொத்தத் தொகைக்கு 2 அழுத்தவும்.`,
+      total: (o) => `இந்த காலத்தில் உங்கள் மொத்தம் ${o.t} ரூபாய். பணம் ${o.month} ${o.d} அன்று.`,
+      pick: "தமிழுக்கு 1 அழுத்தவும்" },
+    ml: { voice: "ml-IN", am: "രാവിലെ", pm: "വൈകുന്നേരം", q: { good: "നല്ലത്", ok: "ശരാശരി", low: "കുറവ്" }, month: "ഒക്ടോബർ",
+      slip: (o) => `നമസ്കാരം ${o.name}. ഇന്ന് ${o.sess} നിങ്ങൾ ${o.l} ലിറ്റർ പാൽ നൽകി. ഗുണനിലവാരം ${o.q}. ഇന്നത്തെ തുക ${o.a} രൂപ. ഈ കാലയളവിലെ ആകെ തുക ${o.t} രൂപ. പണം ${o.month} ${o.d}-ന്. വീണ്ടും കേൾക്കാൻ 1 അമർത്തുക. ആകെ തുക കേൾക്കാൻ 2 അമർത്തുക.`,
+      total: (o) => `ഈ കാലയളവിലെ നിങ്ങളുടെ ആകെ തുക ${o.t} രൂപ. പണം ${o.month} ${o.d}-ന്.`,
+      pick: "മലയാളത്തിന് 2 അമർത്തുക" },
+    hi: { voice: "hi-IN", am: "सुबह", pm: "शाम", q: { good: "अच्छी", ok: "ठीक", low: "कम" }, month: "अक्टूबर",
+      slip: (o) => `नमस्ते ${o.name}. आज ${o.sess} आपने ${o.l} लीटर दूध दिया. गुणवत्ता ${o.q} है. आज की राशि ${o.a} रुपये. इस अवधि का कुल ${o.t} रुपये. भुगतान ${o.d} ${o.month} को होगा. दोबारा सुनने के लिए 1 दबाएँ. कुल राशि सुनने के लिए 2 दबाएँ.`,
+      total: (o) => `इस अवधि का आपका कुल ${o.t} रुपये है. भुगतान ${o.d} ${o.month} को.`,
+      pick: "हिंदी के लिए 3 दबाएँ" },
+    en: { voice: "en-IN", am: "morning", pm: "evening", q: { good: "good", ok: "fair", low: "low" }, month: "October",
+      slip: (o) => `Hello ${o.name}. This ${o.sess} you gave ${o.l} litres of milk. Quality is ${o.q}. Today's amount is ${o.a} rupees. Your total this period is ${o.t} rupees. Payment on ${o.d} ${o.month}. Press 1 to hear again. Press 2 to hear your total.`,
+      total: (o) => `Your total this period is ${o.t} rupees. Payment on ${o.d} ${o.month}.`,
+      pick: "For English press 4" },
+  };
+  const LANGS = ["ta", "ml", "hi", "en"];
+  const LANGNAME = { ta: "Tamil", ml: "Malayalam", hi: "Hindi", en: "English" };
+
+  // ---------- Speech ----------
+  const synth = window.speechSynthesis;
+  const missingVoice = new Set();
+  function speak(text, lang) {
+    if (!synth) return;
+    try {
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = L[lang].voice; u.rate = 0.9;
+      const v = synth.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith(lang));
+      if (v) u.voice = v; else { missingVoice.add(lang); noteVoice(); }
+      synth.speak(u);
+    } catch (e) { /* captions still show */ }
+  }
+  function stopSpeech() { try { synth && synth.cancel() } catch (e) {} }
+  function noteVoice() {
+    const n = document.getElementById("voicenote");
+    if (!synth) { n.textContent = "This browser cannot speak, so the words show on the phone screen instead."; return; }
+    if (missingVoice.size) n.textContent = `No ${[...missingVoice].map(l => LANGNAME[l]).join(", ")} voice on this device, so those words show on the phone screen only. A live service would use recorded or Indian-language voices.`;
+  }
+
+  // ---------- Phone ----------
+  const screen = document.getElementById("screen"), keysEl = document.getElementById("keys");
+  const who = document.getElementById("who");
+  let phone = { state: "idle", fid: 0, lang: null, rec: null, text: "" };
+  const KEYS = ["1","2","3","4","5","6","7","8","9","*","0","#"];
+  keysEl.innerHTML =
+    `<button class="key green" data-key="call" aria-label="Answer call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3.1 4.2 2 2 0 0 1 5.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L9 9.9a16 16 0 0 0 5.1 5.1l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></button>
+     <span></span>
+     <button class="key red" data-key="end" aria-label="End call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button>` +
+    KEYS.map(k => `<button class="key" data-key="${k}" aria-label="Key ${k}">${k}</button>`).join("");
+  farmers.forEach(f => who.insertAdjacentHTML("beforeend", `<option value="${f.id}">${f.name} · ${f.village} · ${LANGNAME[f.lang]}</option>`));
+
+  function latestRec(fid) { const r = records.filter(x => x.fid === fid); return r[r.length - 1]; }
+  function slipWords(lang, f, r) {
+    const p = periodOf(r.day), d = p.pay.split(" ")[0];
+    return L[lang].slip({ name: f.name, sess: r.s === "AM" ? L[lang].am : L[lang].pm, l: r.litres, q: L[lang].q[quality(r.fat, r.snf)], a: amount(r), t: totalFor(f.id, p), d, month: L[lang].month });
+  }
+  function totalWords(lang, f) {
+    const p = PERIODS[1]; return L[lang].total({ t: totalFor(f.id, p), d: p.pay.split(" ")[0], month: L[lang].month });
+  }
+  function hot(list) { keysEl.querySelectorAll(".key").forEach(k => k.classList.toggle("hot", list.includes(k.dataset.key))) }
+  function render() {
+    const f = farmers[phone.fid];
+    let html = `<div class="status"><span>${f.name}'s phone</span><span>${phone.state === "idle" ? "" : "● call"}</span></div>`;
+    screen.classList.toggle("ringing", phone.state === "ringing");
+    if (phone.state === "idle") { html += `<div class="big">Ready</div><div class="en">Waiting for a slip call, or give a missed call.</div>`; hot([]) }
+    if (phone.state === "ringing") { html += `<div class="big">Palamalai Dairy calling</div><div class="en">Press the green key to answer.</div>`; hot(["call"]) }
+    if (phone.state === "dialing") { html += `<div class="big">Missed call sent</div><div class="en">The dairy will call back in a moment. Free for the farmer.</div>`; hot([]) }
+    if (phone.state === "menu") {
+      html += `<div class="big">Choose language</div><div class="cap">${LANGS.map(l => L[l].pick).join("<br>")}</div>`; hot(["1","2","3","4"])
+    }
+    if (phone.state === "playing") {
+      html += `<div class="cap" lang="${phone.lang}">${phone.text}</div>`;
+      if (phone.lang !== "en") html += `<div class="en">${phone.textEn}</div>`;
+      hot(phone.rec ? ["1","2","end"] : ["1","end"]);
+    }
+    if (phone.state === "ended") { html += `<div class="big">Call ended</div>`; hot([]) }
+    screen.innerHTML = html;
+  }
+  function play(kind) {
+    const f = farmers[phone.fid], r = phone.rec;
+    phone.text = kind === "slip" ? slipWords(phone.lang, f, r) : totalWords(phone.lang, f);
+    phone.textEn = kind === "slip" ? slipWords("en", f, r) : totalWords("en", f);
+    phone.last = kind; phone.state = "playing"; render(); speak(phone.text, phone.lang);
+  }
+  function ring(fid, rec) {
+    stopSpeech(); phone = { state: "ringing", fid, lang: farmers[fid].lang, rec, text: "" };
+    who.value = fid; render(); renderSlip(rec);
+  }
+  keysEl.addEventListener("click", e => {
+    const k = e.target.closest("[data-key]")?.dataset.key; if (!k) return;
+    if (k === "end") { stopSpeech(); if (phone.state !== "idle") { phone.state = "ended"; render(); setTimeout(() => { if (phone.state === "ended") { phone.state = "idle"; render() } }, 1500) } return }
+    if (phone.state === "ringing" && k === "call") return play("slip");
+    if (phone.state === "menu" && ["1","2","3","4"].includes(k)) { phone.lang = LANGS[+k - 1]; return play("total") }
+    if (phone.state === "playing" && k === "1") return play(phone.last);
+    if (phone.state === "playing" && k === "2" && phone.rec) return play("total");
+  });
+  document.getElementById("missed").addEventListener("click", () => {
+    stopSpeech(); const fid = +who.value;
+    phone = { state: "dialing", fid, lang: null, rec: null, text: "" }; render(); renderSlip(latestRec(fid));
+    setTimeout(() => { if (phone.state === "dialing") { phone.state = "menu"; render(); speak(LANGS.map(l => L[l].pick).join(". "), "ta") } }, 1600);
+  });
+  who.addEventListener("change", () => { stopSpeech(); phone = { state: "idle", fid: +who.value, lang: null, rec: null }; render(); renderSlip(latestRec(+who.value)) });
+
+  const ICON = {
+    can: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8l-1 4v2l2 3v9H7v-9l2-3V7z"/><path d="M7 14h10"/></svg>`,
+    star: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>`,
+    coin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 8h6M9 11h6M13 8c1.7 0 2 3-1 3H9l5 5"/></svg>`,
+    cal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>`,
+    sum: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 4H6l6 8-6 8h12"/></svg>`,
+  };
+  function renderSlip(r) {
+    const el = document.getElementById("slipcard"); const when = document.getElementById("slipwhen");
+    if (!r) { el.innerHTML = `<p class="muted small">No milk recorded yet for this farmer.</p>`; when.textContent = ""; return }
+    const q = quality(r.fat, r.snf), p = periodOf(r.day);
+    when.textContent = `${+r.day.slice(8)} Oct, ${r.s === "AM" ? "morning" : "evening"}`;
+    el.innerHTML = `
+      <div class="tile">${ICON.can}<span class="v">${r.litres} L</span><span class="l">Milk poured</span></div>
+      <div class="tile">${ICON.star}<span class="v"><span class="chip ${q}">${L.en.q[q]}</span></span><span class="l">Fat ${r.fat}% · SNF ${r.snf}%</span></div>
+      <div class="tile">${ICON.coin}<span class="v">${rs(amount(r))}</span><span class="l">${rs(rate(r.fat, r.snf))} per litre</span></div>
+      <div class="tile">${ICON.sum}<span class="v">${rs(totalFor(r.fid, p))}</span><span class="l">Total ${p.label}</span></div>
+      <div class="tile">${ICON.cal}<span class="v">${p.pay}</span><span class="l">Payment day</span></div>`;
+  }
+
+  // ---------- Collection ----------
+  const vsel = document.getElementById("village"), fgrid = document.getElementById("farmers");
+  VILLAGES.forEach(v => vsel.insertAdjacentHTML("beforeend", `<option>${v}</option>`));
+  const form = { fid: null, litres: 2.0, fat: 4.0, snf: 8.5 };
+  function renderFarmers() {
+    const v = vsel.value, sess = document.getElementById("session").value;
+    fgrid.innerHTML = farmers.filter(f => f.village === v).map(f => {
+      const done = records.some(r => r.fid === f.id && r.day === TODAY && r.s === sess);
+      return `<button type="button" class="farmer" data-fid="${f.id}" aria-pressed="${form.fid === f.id}">
+        <span class="av" style="background:${COLORS[f.id % 7]}">${f.name[0]}</span>${f.name}
+        <span class="small muted">${f.cows} cow${f.cows > 1 ? "s" : ""} · ${LANGNAME[f.lang]}</span>
+        ${done ? `<span class="done">✓ recorded</span>` : ""}</button>`;
+    }).join("");
+  }
+  function renderEntry() {
+    ["litres", "fat", "snf"].forEach(k => document.getElementById("o-" + k).textContent = form[k].toFixed(1));
+    const q = quality(form.fat, form.snf), r = rate(form.fat, form.snf);
+    document.getElementById("preview").innerHTML =
+      `<span>Rate <strong>${rs(r)}</strong> / litre</span><span>Amount <strong>${rs(form.litres * r)}</strong></span><span class="chip ${q}">Quality: ${L.en.q[q]}</span>`;
+    const f = form.fid == null ? null : farmers[form.fid];
+    document.getElementById("save").disabled = !f;
+    document.getElementById("pick").textContent = f ? `For ${f.name}. The slip will be spoken in ${LANGNAME[f.lang]}.` : "Tap a farmer first.";
+  }
+  fgrid.addEventListener("click", e => { const b = e.target.closest("[data-fid]"); if (!b) return; form.fid = +b.dataset.fid; renderFarmers(); renderEntry() });
+  document.getElementById("entrycard").addEventListener("click", e => {
+    const b = e.target.closest("[data-k]"); if (!b) return;
+    const k = b.dataset.k, d = +b.dataset.d, lim = { litres: [0.5, 30], fat: [2.5, 7], snf: [7, 10] }[k];
+    form[k] = Math.min(lim[1], Math.max(lim[0], Math.round((form[k] + d) * 10) / 10)); renderEntry();
+  });
+  [vsel, document.getElementById("session")].forEach(el => el.addEventListener("change", () => { form.fid = null; renderFarmers(); renderEntry() }));
+  document.getElementById("save").addEventListener("click", () => {
+    if (form.fid == null) return;
+    const rec = { day: TODAY, s: document.getElementById("session").value, fid: form.fid, litres: form.litres, fat: form.fat, snf: form.snf, call: "answered" };
+    records.push(rec); const f = farmers[form.fid];
+    toast(`Saved. ${f.name}'s phone is ringing with the slip in ${LANGNAME[f.lang]}.`);
+    form.fid = null; renderFarmers(); renderEntry(); renderDash();
+    select("call"); ring(rec.fid, rec);
+  });
+
+  // ---------- Dashboard ----------
+  function renderDash() {
+    const today = records.filter(r => r.day === TODAY), yday = records.filter(r => r.day === "2026-10-23");
+    const sumL = a => a.reduce((x, r) => x + r.litres, 0);
+    const active = new Set(today.map(r => r.fid)).size;
+    const avg = (a, k) => a.length ? (a.reduce((x, r) => x + r[k], 0) / a.length) : 0;
+    const p2 = records.filter(r => periodOf(r.day) === PERIODS[1]), p1 = records.filter(r => periodOf(r.day) === PERIODS[0]);
+    const due = p2.reduce((x, r) => x + amount(r), 0);
+    const calls = records.filter(r => +r.day.slice(8) >= 18), ans = calls.filter(r => r.call === "answered").length;
+    document.getElementById("kpis").innerHTML = [
+      ["Milk today (morning so far)", `${sumL(today).toFixed(1)} L`, `Yesterday ${sumL(yday).toFixed(1)} L`],
+      ["Farmers who poured today", `${active} of ${farmers.length}`, `${farmers.length - active} not yet`],
+      ["Average quality, 7 days", `${avg(records.slice(-140), "fat").toFixed(1)}% fat`, `${avg(records.slice(-140), "snf").toFixed(1)}% SNF`],
+      [`Money due, ${PERIODS[1].label}`, rs(due), `Pay on ${PERIODS[1].pay}`],
+      ["Slip calls answered, 7 days", `${Math.round(ans / calls.length * 100)}%`, `${calls.length - ans} missed or no answer`],
+    ].map(([l, v, s]) => `<div class="kpi"><span class="l">${l}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join("");
+
+    // chart
+    const W = 620, H = 230, P = { l: 36, r: 10, t: 10, b: 28 }, max = 560;
+    const y = v => P.t + (H - P.t - P.b) * (1 - v / max), bw = (W - P.l - P.r) / days.length;
+    let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Litres collected per day">`;
+    [0, 100, 200, 300, 400, 500].forEach(v => svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" /><text x="${P.l - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`);
+    days.forEach((d, i) => {
+      const v = sumL(records.filter(r => r.day === d)), x = P.l + i * bw + 3, isT = d === TODAY;
+      svg += `<rect x="${x}" y="${y(v)}" width="${bw - 6}" height="${y(0) - y(v)}" rx="3" fill="${isT ? "var(--accent)" : "var(--leaf)"}" opacity="${isT ? 1 : .85}"><title>${+d.slice(8)} Oct: ${v.toFixed(1)} L</title></rect>`;
+      if (i % 2 === 1 || isT) svg += `<text x="${x + (bw - 6) / 2}" y="${H - 10}" text-anchor="middle">${isT ? "today" : +d.slice(8)}</text>`;
+    });
+    [[170, "low 170"], [320, "base 320"], [530, "high 530"]].forEach(([v, t]) => svg += `<line x1="${P.l}" x2="${W - P.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--muted)" stroke-dasharray="5 4"/><text x="${W - P.r - 4}" y="${y(v) - 4}" text-anchor="end">${t}</text>`);
+    document.getElementById("chart").innerHTML = svg + `</svg>`;
+
+    // attention
+    const lastDay = fid => { const r = records.filter(x => x.fid === fid); return r.length ? +r[r.length - 1].day.slice(8) : 0 };
+    const items = [];
+    farmers.forEach(f => { const d = lastDay(f.id); if (24 - d >= 3) items.push([`${f.name} (${f.village}) has not poured since ${d} Oct`, "low"]) });
+    VILLAGES.forEach(v => { const a = records.filter(r => farmers[r.fid].village === v && +r.day.slice(8) >= 18); if (a.length && avg(a, "fat") < 3.7) items.push([`${v}: fat is low this week (${avg(a, "fat").toFixed(1)}%)`, "ok"]) });
+    unpaidLast.forEach(id => items.push([`${farmers[id].name} not yet paid for ${PERIODS[0].label}`, "ok"]));
+    const missedNow = farmers.filter(f => { const r = latestRec(f.id); return r && r.call !== "answered" });
+    if (missedNow.length) items.push([`${missedNow.length} farmers missed their last slip call; they can give a missed call to hear it`, "ok"]);
+    document.getElementById("attention").innerHTML = items.map(([t, c]) => `<li><span>${t}</span><span class="chip ${c}">${c === "low" ? "Check" : "Note"}</span></li>`).join("") || `<li>All clear.</li>`;
+
+    // villages
+    const last7 = records.filter(r => +r.day.slice(8) >= 17 && r.day !== TODAY);
+    document.getElementById("vtable").innerHTML = `<thead><tr><th>Village</th><th class="n">Farmers</th><th class="n">Litres per day</th><th class="n">Fat %</th><th class="n">SNF %</th><th>Quality</th></tr></thead><tbody>` +
+      VILLAGES.map(v => { const a = last7.filter(r => farmers[r.fid].village === v), fat = avg(a, "fat"), snf = avg(a, "snf"), q = quality(fat, snf);
+        return `<tr><td>${v}</td><td class="n">${new Set(a.map(r => r.fid)).size}</td><td class="n">${(sumL(a) / 7).toFixed(1)}</td><td class="n">${fat.toFixed(1)}</td><td class="n">${snf.toFixed(1)}</td><td><span class="chip ${q}">${L.en.q[q]}</span></td></tr>` }).join("") + `</tbody>`;
+
+    // payments
+    const due1 = p1.reduce((x, r) => x + amount(r), 0), unpaidAmt = [...unpaidLast].reduce((x, id) => x + totalFor(id, PERIODS[0]), 0);
+    document.getElementById("ptable").innerHTML = `<thead><tr><th>Period</th><th class="n">Amount</th><th>Status</th></tr></thead><tbody>
+      <tr><td>${PERIODS[0].label}<br><span class="small muted">paid ${PERIODS[0].pay}</span></td><td class="n">${rs(due1)}</td><td><span class="chip good">Paid ${rs(due1 - unpaidAmt)}</span><br><span class="chip ok" style="margin-top:4px">Pending ${rs(unpaidAmt)} (2 farmers)</span></td></tr>
+      <tr><td>${PERIODS[1].label}<br><span class="small muted">pay on ${PERIODS[1].pay}</span></td><td class="n">${rs(due)}</td><td><span class="chip ok">Running</span></td></tr></tbody>`;
+  }
+  document.getElementById("base").addEventListener("input", e => { const v = +e.target.value; if (v >= 20 && v <= 200) { BASE = v; renderDash(); renderEntry(); renderSlip(latestRec(phone.fid)) } });
+
+  // ---------- Tabs & toast ----------
+  const TABS = { call: "t-call", collect: "t-collect", dash: "t-dash" };
+  function select(name) {
+    Object.entries(TABS).forEach(([n, id]) => { const t = document.getElementById(id), on = n === name; t.setAttribute("aria-selected", on); document.getElementById(t.getAttribute("aria-controls")).hidden = !on });
+    if (name !== "call") stopSpeech();
+  }
+  Object.entries(TABS).forEach(([n, id]) => document.getElementById(id).addEventListener("click", () => select(n)));
+  let tt; function toast(m) { const t = document.getElementById("toast"); t.textContent = m; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 3500) }
+  const h = location.hash.slice(1); if (TABS[h]) select(h);
+
+  // ---------- Start ----------
+  if (synth && synth.onvoiceschanged !== undefined) synth.onvoiceschanged = () => {};
+  noteVoice(); renderFarmers(); renderEntry(); renderDash();
+  const first = latestRec(0); ring(0, first);
+})();
+</script>
