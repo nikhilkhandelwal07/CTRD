@@ -1,7 +1,7 @@
-// Quality-based milk price, from the dairy unit economics (DPR-05/06, 26 Oct 2026).
+// Quality-based milk price (dairy business plan, 26 Oct 2026): Rs 100 base, what families get for desi milk today.
 // Base price is paid at 4.0% fat and 8.5% SNF; each 0.1% above or below moves the rate by a step.
 
-export const DEFAULT_PRICE = { basePrice: 60, fatStep: 1, snfStep: 0.5, refFat: 4.0, refSnf: 8.5 };
+export const DEFAULT_PRICE = { basePrice: 100, fatStep: 1, snfStep: 0.5, refFat: 4.0, refSnf: 8.5 };
 
 export function rateFor(fat, snf, p = DEFAULT_PRICE) {
   const r = p.basePrice + (fat - p.refFat) * 10 * p.fatStep + (snf - p.refSnf) * 10 * p.snfStep;

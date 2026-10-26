@@ -4,7 +4,7 @@
 import { CONFIG } from "./config.js";
 import { makeSeed } from "./seed.js";
 
-const KEY = "palamalai-milk-slip-v3";
+const KEY = "palamalai-milk-slip-v4";
 const uid = (p) => p + Math.random().toString(36).slice(2, 9);
 
 async function sha256(text) {
@@ -94,7 +94,7 @@ class SupabaseStore {
     const payments = {}; (p.data || []).forEach((x) => (payments[x.period_key + "|" + x.farmer_id] = x.paid_on));
     this.state = {
       villages: (v.data || []).map(camel), farmers: (f.data || []).map(camel), records: (r.data || []).map(camel),
-      payments, settings: s.data ? camel(s.data) : { basePrice: 60, fatStep: 1, snfStep: 0.5, refFat: 4, refSnf: 8.5 },
+      payments, settings: s.data ? camel(s.data) : { basePrice: 100, fatStep: 1, snfStep: 0.5, refFat: 4, refSnf: 8.5 },
       audit: (a.data || []).map((x) => ({ ts: x.ts, who: x.who, action: x.action, detail: x.detail })),
     };
     return this.state;

@@ -5,7 +5,7 @@ import { rs } from "../pricing.js";
 
 function chart(ctx, d) {
   const W = 640, H = 230, L = 40, R = 12, T = 14, B = 26;
-  const BE = 160; // break-even volume from the unit economics (DPR-05/06)
+  const BE = 122; // break-even volume from the unit economics (DPR-05/06)
   const max = Math.max(BE, ...d.perDay.map((x) => x.litres)) * 1.15;
   const step = max > 400 ? 100 : max > 150 ? 50 : 20;
   const y = (v) => T + (H - T - B) * (1 - v / max);

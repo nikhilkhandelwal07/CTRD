@@ -12,7 +12,7 @@ Many families who will supply milk cannot read, and many do not have smartphones
 |---|---|---|
 | Farmer's phone | Farmer | A keypad phone that rings after each pour and speaks litres, quality, amount, cycle total and payment day. A missed call plays the total in the chosen language |
 | Collection | Collection volunteer | Tap the farmer, set litres, fat and SNF, save. The farmer's phone rings with the slip |
-| Dashboard | CTRD, dairy company | Milk per day against the 160 L/day break-even, quality by village, farmers who stopped pouring, unpaid farmers, payments by 10-day cycle |
+| Dashboard | CTRD, dairy company | Milk per day against the 122 L/day break-even, quality by village, farmers who stopped pouring, unpaid farmers, payments by 10-day cycle |
 | Farmers | CTRD admin | Add, edit, remove (keeps history), restore or delete farmers; manage villages |
 | Settings | CTRD admin | Price rule, PINs, where the data is kept, activity log |
 
@@ -20,7 +20,7 @@ The interface switches between English, Tamil, Malayalam and Hindi on every scre
 
 ## Price rule
 
-₹60 a litre at 4.0% fat and 8.5% SNF, plus or minus ₹1 for each 0.1% fat and ₹0.50 for each 0.1% SNF. It comes from the dairy unit economics in the 26 Oct progress report: above Aavin's ₹44 procurement price, and the company still breaks even at about 160 litres a day. An admin can change it.
+₹100 a litre at 4.0% fat and 8.5% SNF (what families get for desi milk today), plus or minus ₹1 for each 0.1% fat and ₹0.50 for each 0.1% SNF. The dairy company sells at ₹150 a litre in Coimbatore and breaks even at about 122 litres a day (dairy business plan, 26 Oct). An admin can change it.
 
 ## Code layout
 
