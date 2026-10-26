@@ -1,25 +1,52 @@
-# CTRD Voice Milk Slip (prototype)
+# Palamalai Milk Slip
 
-A clickable prototype built during the SPJIMR DoCC internship with CTRD Trust in Palamalai, Coimbatore (Oct to Nov 2026).
+A prototype built during the SPJIMR DoCC internship with CTRD Trust in Palamalai, Coimbatore (Oct to Nov 2026), for a farmer-owned desi-cow dairy company.
 
-Many dairy farmers in the planned desi-cow FPC cannot read, and many do not have smartphones. So the milk slip is spoken to them on an ordinary phone call. It is available in Tamil, Malayalam, Hindi and English.
+Many families who will supply milk cannot read, and many do not have smartphones. So every pour is confirmed by a **spoken slip** on an ordinary phone, in Tamil, Malayalam, Hindi or English. CTRD and the dairy company track everything on one dashboard.
 
-## What it shows
+**Live demo:** https://nikhilkhandelwal07.github.io/CTRD/ (after GitHub Pages is switched on; see `docs/hosting.md`).
 
-1. **Phone call.** The farmer gives a missed call. The call back speaks today's slip: litres, fat, SNF, quality, rate, amount and the running total for the pay period. Keypad: 1 to repeat, 2 for the total.
-2. **Collection.** The collection volunteer picks the farmer, enters litres, fat and SNF, and saves. The farmer's phone rings with the slip.
-3. **Dashboard.** For the FPC and CTRD: litres per day, villages, farmers who have stopped supplying, payments due, and the price rule.
+## What it does
 
-## Run it
+| Screen | Who uses it | What it shows |
+|---|---|---|
+| Farmer's phone | Farmer | A keypad phone that rings after each pour and speaks litres, quality, amount, cycle total and payment day. A missed call plays the total in the chosen language |
+| Collection | Collection volunteer | Tap the farmer, set litres, fat and SNF, save. The farmer's phone rings with the slip |
+| Dashboard | CTRD, dairy company | Milk per day against the 160 L/day break-even, quality by village, farmers who stopped pouring, unpaid farmers, payments by 10-day cycle |
+| Farmers | CTRD admin | Add, edit, remove (keeps history), restore or delete farmers; manage villages |
+| Settings | CTRD admin | Price rule, PINs, where the data is kept, activity log |
 
-Open `index.html` in a browser (Chrome on Android or desktop works best). No install or server is needed. The voice uses the browser's built-in speech; if a language has no voice on that device, the text is shown instead.
+The interface switches between English, Tamil, Malayalam and Hindi on every screen.
+
+## Price rule
+
+₹60 a litre at 4.0% fat and 8.5% SNF, plus or minus ₹1 for each 0.1% fat and ₹0.50 for each 0.1% SNF. It comes from the dairy unit economics in the 26 Oct progress report: above Aavin's ₹44 procurement price, and the company still breaks even at about 160 litres a day. An admin can change it.
+
+## Code layout
+
+```
+index.html            app shell (GitHub Pages serves this)
+css/app.css           design tokens, light and dark themes
+js/app.js             navigation, language, sign-in
+js/i18n.js            all interface text in four languages
+js/voice.js           spoken slip text and speech
+js/pricing.js         price rule and pay cycles
+js/store.js           data layer: browser storage or Supabase
+js/calc.js            dashboard numbers
+js/views/*.js         one file per screen
+supabase/schema.sql   free shared database with roles and access rules
+tools/build.mjs       rebuilds index.html and the single-file demo (dist/)
+docs/                 hosting and voice options
+```
+
+No framework and no build step are needed to run it. `node tools/build.mjs` only regenerates `index.html` and `dist/milk_slip.html` after editing `tools/shell.html` or the code.
 
 ## Status
 
-- All farmer names, villages and figures are **sample data**.
-- The price rule (base rate plus fat and SNF steps) is a placeholder until the dairy unit economics are worked out.
-- The Tamil, Malayalam and Hindi text needs checking by native speakers.
-- Voice service options for a real phone line are in [docs/voice_options.md](docs/voice_options.md).
+- All farmer names, phone numbers and figures are **sample data**.
+- Tamil, Malayalam and Hindi text needs checking by native speakers at CTRD.
+- The Supabase connection is written but has not been tested against a live project yet.
+- Free voice options for a real phone line are in `docs/voice_options.md`; hosting steps in `docs/hosting.md`.
 
 ## Team
 

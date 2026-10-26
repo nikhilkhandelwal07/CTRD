@@ -41,3 +41,13 @@ The prototype uses the browser's built-in voice (Web Speech API). It is free, bu
 - [AI4Bharat IndicConformer ASR](https://github.com/AI4Bharat/IndicConformerASR)
 - [Bhashini ULCA](https://bhashini.gov.in/ulca)
 - [Exotel pricing review, CloudTalk, Jul 2026](https://www.cloudtalk.io/blog/exotel-pricing/)
+
+## Free models we can use (checked 26 Oct 2026)
+
+| Need | Free option | Licence | Covers Ta / Ml / Hi / En | How we would use it |
+|---|---|---|---|---|
+| Speak the slip (text to speech) | **AI4Bharat Indic Parler-TTS** | Apache 2.0, free for commercial use | Yes, all four (21 languages) | Run once on a free Google Colab notebook to record the fixed phrases and number words in each language; a CTRD staff member checks each clip; the phone line plays the clips |
+| Understand speech (speech to text), later | **AI4Bharat IndicConformer** | MIT | Yes, all 22 official languages | Only for a future question line; not needed for the keypad slip |
+| Demo voice | Browser speech (Web Speech API) | Free, built into the phone or laptop | Depends on the device; Malayalam often missing | What the prototype uses today |
+
+Paid services (Sarvam, Gnani, ElevenLabs) remain options if CTRD later wants live, unscripted speech, but the milk slip does not need them: it is a fixed sentence, so recordings made once with a free model are enough.
