@@ -15,7 +15,7 @@ export function makeSeed() {
   const villages = VILLAGES.map((name, i) => ({ id: "v" + (i + 1), name }));
   const farmers = NAMES.map(([name, lang], i) => ({
     id: "f" + (i + 1), name, lang, villageId: villages[i % 7].id, cows: 1 + ((i * 7) % 3),
-    phone: "98" + String(40000000 + i * 1234567).slice(0, 8), active: true, createdAt: "2026-10-10",
+    phone: "99999000" + String(i + 1).padStart(2, "0"), active: true, createdAt: "2026-10-10",
   }));
   const today = todayIso();
   const days = []; for (let k = 13; k >= 0; k--) days.push(iso(new Date(Date.parse(today) - k * 86400000)));
