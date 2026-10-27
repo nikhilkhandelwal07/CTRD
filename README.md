@@ -2,7 +2,7 @@
 
 A prototype built during the SPJIMR DoCC internship with CTRD Trust in Palamalai, Coimbatore (Oct to Nov 2026), for a farmer-owned desi-cow dairy company.
 
-Many families who will supply milk cannot read, and many do not have smartphones. So every pour is confirmed by a **spoken slip** on an ordinary phone, in Tamil, Malayalam, Hindi or English. CTRD and the dairy company track everything on one dashboard.
+Many families who will supply milk cannot read, and many do not have smartphones. So every pour is confirmed by a **slip read aloud at the collection point** in Tamil, Malayalam, Hindi or English, each pay cycle ends with **one voice call** about the amount and payment, and a **missed call** gets the balance at any time. CTRD and the dairy company track everything on one dashboard.
 
 **Live demo:** https://nikhilkhandelwal07.github.io/CTRD/ (after GitHub Pages is switched on; see `docs/hosting.md`).
 
@@ -10,17 +10,17 @@ Many families who will supply milk cannot read, and many do not have smartphones
 
 | Screen | Who uses it | What it shows |
 |---|---|---|
-| Farmer's phone | Farmer | A keypad phone that rings after each pour and speaks litres, quality, amount, cycle total and payment day. A missed call plays the total in the chosen language |
-| Collection | Collection volunteer | Tap the farmer, set litres, fat and SNF, save. The farmer's phone rings with the slip |
-| Dashboard | CTRD, dairy company | Milk per day against the 122 L/day break-even, quality by village, farmers who stopped pouring, unpaid farmers, payments by 10-day cycle |
+| Collection | Collection volunteer | Tap the member, set litres, fat and SNF, save. The slip is read aloud on the spot in the member's language |
+| Dashboard | CTRD, dairy company | Milk per day, progress to the company's break-even volume, quality by village, members who stopped pouring, payments by 10-day cycle |
 | Farmers | CTRD admin | Add, edit, remove (keeps history), restore or delete farmers; manage villages |
 | Settings | CTRD admin | Price rule, PINs, where the data is kept, activity log |
+| Farmer's line | Members | The 10-day payment call and the missed-call balance line on a basic keypad phone |
 
 The interface switches between English, Tamil, Malayalam and Hindi on every screen.
 
 ## Price rule
 
-₹100 a litre at 4.0% fat and 8.5% SNF (what families get for desi milk today), plus or minus ₹1 for each 0.1% fat and ₹0.50 for each 0.1% SNF. The dairy company sells at ₹150 a litre in Coimbatore and breaks even at about 122 litres a day (dairy business plan, 26 Oct). An admin can change it.
+₹100 a litre at 4.0% fat and 8.5% SNF (what families get for desi milk today), plus or minus ₹1 for each 0.1% fat and ₹0.50 for each 0.1% SNF. The household price and break-even are still being tested (see the daily reports of 26 and 27 Oct). An admin can change the rule.
 
 ## Code layout
 

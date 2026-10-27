@@ -43,7 +43,7 @@ export function render(ctx) {
     ${kpi(t("dash.poured"), `${d.pouredToday} / ${d.activeCount}`, t("dash.notYet", { n: d.activeCount - d.pouredToday }))}
     ${kpi(t("dash.quality7"), d.fat7.toFixed(1) + "% " + t("dash.fat"), d.snf7.toFixed(1) + "% SNF")}
     ${kpi(t("dash.due"), rs(d.due), t("dash.payOn", { d: ctx.fmtDate(d.cur.payDay) }))}
-    ${kpi(t("dash.calls"), Math.round(d.calls * 100) + "%", t("dash.missedCalls", { n: d.missedCalls }), d.calls < 0.8 ? "warn" : "")}
+    ${kpi(t("dash.paidOnTime"), d.paidShare === null ? "–" : Math.round(d.paidShare * 100) + "%", t("dash.paidOnTimeSub", { n: d.unpaidLast }), d.paidShare !== null && d.paidShare < 0.9 ? "warn" : "")}
   </div>
   <div class="grid-2">
     <div class="panel"><div class="row between"><h2>${t("dash.chartTitle")}</h2><span class="muted small">${t("dash.chartUnit")}</span></div>${chart(ctx, d)}

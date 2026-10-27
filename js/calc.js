@@ -54,7 +54,11 @@ export function dashboard(s) {
     const any = recs[0] ? periodOf(recs[0].day) : periodOf(today);
     return { key: k, from: any.from, to: any.to, payDay: any.payDay, total, paidAmt, unpaid, open: k === cur.key };
   }).reverse();
+  const lastP = periods.find((p) => !p.open);
+  const lastFids = lastP ? [...new Set(s.records.filter((r) => periodOf(r.day).key === lastP.key).map((r) => r.farmerId))] : [];
+  const paidShare = lastFids.length ? (lastFids.length - lastP.unpaid.length) / lastFids.length : null;
   return {
+    paidShare, unpaidLast: lastP ? lastP.unpaid.length : 0,
     today, perDay, todayLitres: todayRecs.reduce((a, r) => a + r.litres, 0), yesterdayLitres: yest.litres,
     pouredToday: new Set(todayRecs.map((r) => r.farmerId)).size, activeCount: af.length,
     fat7: avg(last7, "fat"), snf7: avg(last7, "snf"), due, cur, calls, missedCalls, attention, villages, periods,

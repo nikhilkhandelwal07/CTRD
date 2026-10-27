@@ -10,13 +10,13 @@ import * as farmers from "./views/farmers.js";
 import * as settings from "./views/settings.js";
 
 const VIEWS = { phone, collect, dashboard: dash, farmers, settings };
-const NAV = [["phone", "phone", "nav.phone"], ["collect", "can", "nav.collect"], ["dashboard", "chart", "nav.dash"], ["farmers", "people", "nav.farmers"], ["settings", "gear", "nav.settings"]];
+const NAV = [["collect", "can", "nav.collect"], ["dashboard", "chart", "nav.dash"], ["farmers", "people", "nav.farmers"], ["settings", "gear", "nav.settings"], ["phone", "phone", "nav.phone"]];
 const RANK = { viewer: 0, volunteer: 1, admin: 2 };
 const LOCALE = { en: "en-IN", ta: "ta-IN", ml: "ml-IN", hi: "hi-IN" };
 const PREF = "palamalai-milk-slip-lang";
 
 const store = createStore();
-let lang = "en", view = "phone", user = null;
+let lang = "en", view = "collect", user = null;
 try { lang = localStorage.getItem(PREF) || lang; } catch (e) {}
 if (!STRINGS[lang]) lang = "en";
 

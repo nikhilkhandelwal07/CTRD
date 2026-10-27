@@ -26,14 +26,31 @@ export const SLIP = {
 };
 export const VOICE_LANGS = ["ta", "ml", "hi", "en"];
 
-export function slipText(lang, { name, session, litres, quality, amount, total, payDay }) {
+const KEYS_FROM = { ta: "மீண்டும் கேட்க", ml: "വീണ്ടും കേൾക്കാൻ", hi: "दोबारा सुनने", en: "Press 1" };
+export function slipText(lang, { name, session, litres, quality, amount, total, payDay }, withKeys = true) {
   const L = SLIP[lang] || SLIP.en; const [, m, d] = payDay.split("-").map(Number);
-  return L.slip({ name, sess: session === "AM" ? L.am : L.pm, l: litres, q: L.q[quality], a: Math.round(amount), t: Math.round(total), month: MONTHS[lang][m - 1], d });
+  const full = L.slip({ name, sess: session === "AM" ? L.am : L.pm, l: litres, q: L.q[quality], a: Math.round(amount), t: Math.round(total), month: MONTHS[lang][m - 1], d });
+  if (withKeys) return full;
+  const k = full.indexOf(KEYS_FROM[lang] || KEYS_FROM.en);
+  return k > 0 ? full.slice(0, k).trim() : full;
 }
 export function totalText(lang, { total, payDay }) {
   const L = SLIP[lang] || SLIP.en; const [, m, d] = payDay.split("-").map(Number);
   return L.total({ t: Math.round(total), month: MONTHS[lang][m - 1], d });
 }
+
+// 10-day payment call: one call per member per pay cycle with the total and the payment.
+const PAY = {
+  en: { day: (d, m) => `${d} ${m}`, text: (o) => `Hello ${o.name}. This is Palamalai Dairy. From ${o.from} to ${o.to}, you poured ${o.l} litres of milk. Your amount is ${o.t} rupees. ${o.paid ? "It has been paid into your bank account." : `It will be paid into your bank account on ${o.pay}.`} Thank you.` },
+  ta: { day: (d, m) => `${m} ${d}`, text: (o) => `வணக்கம் ${o.name}. இது பாலமலை பால் பண்ணை. ${o.from} முதல் ${o.to} வரை நீங்கள் ${o.l} லிட்டர் பால் கொடுத்தீர்கள். உங்கள் தொகை ${o.t} ரூபாய். ${o.paid ? "இது உங்கள் வங்கிக் கணக்கில் செலுத்தப்பட்டது." : `இது ${o.pay} அன்று உங்கள் வங்கிக் கணக்கில் செலுத்தப்படும்.`} நன்றி.` },
+  ml: { day: (d, m) => `${m} ${d}`, text: (o) => `നമസ്കാരം ${o.name}. ഇത് പാലമല ഡയറിയാണ്. ${o.from} മുതൽ ${o.to} വരെ നിങ്ങൾ ${o.l} ലിറ്റർ പാൽ നൽകി. നിങ്ങളുടെ തുക ${o.t} രൂപ. ${o.paid ? "ഇത് നിങ്ങളുടെ ബാങ്ക് അക്കൗണ്ടിൽ അടച്ചു." : `ഇത് ${o.pay}-ന് നിങ്ങളുടെ ബാങ്ക് അക്കൗണ്ടിൽ അടയ്ക്കും.`} നന്ദി.` },
+  hi: { day: (d, m) => `${d} ${m}`, text: (o) => `नमस्ते ${o.name}. यह पालमलई डेयरी है. ${o.from} से ${o.to} तक आपने ${o.l} लीटर दूध दिया. आपकी राशि ${o.t} रुपये है. ${o.paid ? "यह आपके बैंक खाते में जमा कर दी गई है." : `यह ${o.pay} को आपके बैंक खाते में जमा होगी.`} धन्यवाद.` },
+};
+export function payText(lang, { name, litres, total, from, to, payDay, paid }) {
+  const P = PAY[lang] || PAY.en; const sp = (iso) => { const [, m, d] = iso.split("-").map(Number); return P.day(d, MONTHS[lang][m - 1]); };
+  return P.text({ name, l: Math.round(litres * 10) / 10, t: Math.round(total), from: sp(from), to: sp(to), pay: sp(payDay), paid });
+}
+
 export const menuText = () => VOICE_LANGS.map((l) => SLIP[l].pick).join(". ");
 
 const synth = typeof window !== "undefined" ? window.speechSynthesis : null;

@@ -1,22 +1,34 @@
-// Farmer's phone: a basic keypad phone that receives the spoken slip, and the missed-call line.
+// Farmer's line: what reaches members who may not read or own a smartphone.
+//  1. Every pour: the slip is spoken aloud at the collection point (see collect.js).
+//  2. Every pay cycle: one call with the cycle total and the payment.
+//  3. Any time: a free missed call; the dairy calls back and reads the balance.
 import { esc, icon, $, $$ } from "../ui.js";
 import { activeFarmers, latestRecord, periodTotal, villageName, byId } from "../calc.js";
 import { periodOf, quality, rs } from "../pricing.js";
-import { slipText, totalText, menuText, speak, stop, missing, VOICE_LANGS, SLIP } from "../voice.js";
+import { todayIso } from "../seed.js";
+import { slipText, totalText, payText, menuText, speak, stop, missing, VOICE_LANGS } from "../voice.js";
 
-const ph = { state: "idle", farmerId: null, rec: null, lang: null, screen: "" };
+const ph = { state: "idle", farmerId: null, lang: null, screen: "", last: null };
 
-export function ring(farmerId, rec) { ph.farmerId = farmerId; ph.rec = rec; ph.state = "ringing"; ph.lang = null; }
+function lastClosed(s) {
+  const cur = periodOf(todayIso()).key;
+  const keys = [...new Set(s.records.map((r) => periodOf(r.day).key))].filter((k) => k < cur).sort();
+  return keys[keys.length - 1] || cur;
+}
+function cycleInfo(s, fid, key) {
+  const recs = s.records.filter((r) => r.farmerId === fid && periodOf(r.day).key === key);
+  const p = recs[0] ? periodOf(recs[0].day) : periodOf(todayIso());
+  return { key, from: p.from, to: p.to, payDay: p.payDay, litres: recs.reduce((a, r) => a + r.litres, 0), total: recs.reduce((a, r) => a + r.amount, 0), paidOn: s.payments[key + "|" + fid] || null };
+}
 
 export function render(ctx) {
   const { s, t } = ctx;
   const list = activeFarmers(s);
   if (!ph.farmerId || !byId(s.farmers, ph.farmerId)) ph.farmerId = list[0] && list[0].id;
   const f = byId(s.farmers, ph.farmerId);
-  const rec = ph.rec || (f && latestRecord(s, f.id));
-  const per = rec ? periodOf(rec.day) : periodOf(new Date().toISOString().slice(0, 10));
-  const total = f ? periodTotal(s, f.id, per.key) : 0;
+  const rec = f && latestRecord(s, f.id);
   const q = rec ? quality(rec.fat, rec.snf, s.settings) : null;
+  const cyc = f ? cycleInfo(s, f.id, lastClosed(s)) : null;
   const screen = {
     idle: `<div class="ps-name">${esc(f ? f.name : "")}</div><div class="ps-big">${t("phone.idle")}</div>`,
     ringing: `<div class="ps-name">${t("phone.incoming")}</div><div class="ps-big pulse">${t("phone.dairyCalling")}</div><div class="ps-hint">${t("phone.pressGreen")}</div>`,
@@ -40,23 +52,28 @@ export function render(ctx) {
     </div>
     <div class="stack">
       <div class="panel">
-        <div class="row wrap gap-m end">
-          <label class="field grow"><span>${t("phone.whose")}</span>
-            <select id="ph-farmer">${list.map((x) => `<option value="${x.id}" ${x.id === ph.farmerId ? "selected" : ""}>${esc(x.name)} · ${esc(villageName(s, x.villageId))} · ${t("lang." + x.lang)}</option>`).join("")}</select></label>
-          <button class="btn amber" id="ph-missed">${icon("missed")} ${t("phone.missed")}</button>
+        <label class="field"><span>${t("phone.whose")}</span>
+          <select id="ph-farmer">${list.map((x) => `<option value="${x.id}" ${x.id === ph.farmerId ? "selected" : ""}>${esc(x.name)} · ${esc(villageName(s, x.villageId))} · ${t("lang." + x.lang)}</option>`).join("")}</select></label>
+        <div class="row wrap gap-s">
+          <button class="btn amber" id="ph-pay">${icon("call")} ${t("phone.payCall")}</button>
+          <button class="btn" id="ph-missed">${icon("missed")} ${t("phone.missed")}</button>
         </div>
-        <ol class="steps">
-          <li>${t("phone.step1")}</li><li>${t("phone.step2")}</li><li>${t("phone.step3")}</li>
-        </ol>
+        <ol class="steps"><li>${t("phone.step1")}</li><li>${t("phone.step2")}</li><li>${t("phone.step3")}</li></ol>
       </div>
+      ${cyc ? `<div class="panel">
+        <div class="row between"><h2>${t("phone.cycleTitle")}</h2><span class="muted small">${ctx.fmtRange(cyc.from, cyc.to)}</span></div>
+        <div class="slip">
+          <div class="slip-item"><span class="label">${t("slip.poured")}</span><b class="num">${cyc.litres.toFixed(1)} L</b></div>
+          <div class="slip-item"><span class="label">${t("col.amount")}</span><b class="num">${rs(cyc.total)}</b></div>
+          <div class="slip-item"><span class="label">${t("col.status")}</span><b>${cyc.paidOn ? `<span class="pill q-good">${t("dash.paid")}</span>` : `<span class="pill q-fair">${t("phone.due")}</span>`}</b><span class="muted small">${ctx.fmtDate(cyc.paidOn || cyc.payDay)}</span></div>
+        </div>
+      </div>` : ""}
       <div class="panel">
-        <div class="row between"><h2>${t("phone.hears")}</h2><span class="muted small">${rec ? `${ctx.fmtDate(rec.day)} · ${t(rec.session === "AM" ? "sess.AM" : "sess.PM")}` : ""}</span></div>
+        <div class="row between"><h2>${t("phone.lastPour")}</h2><span class="muted small">${rec ? `${ctx.fmtDate(rec.day)} · ${t(rec.session === "AM" ? "sess.AM" : "sess.PM")}` : ""}</span></div>
         ${rec ? `<div class="slip">
           <div class="slip-item"><span class="label">${t("slip.poured")}</span><b class="num">${rec.litres} L</b></div>
           <div class="slip-item"><span class="label">${t("slip.quality")}</span><b><span class="pill q-${q}">${t("q." + q)}</span></b><span class="muted small num">${t("slip.fatSnf", { fat: rec.fat, snf: rec.snf })}</span></div>
           <div class="slip-item"><span class="label">${t("slip.amount")}</span><b class="num">${rs(rec.amount)}</b><span class="muted small num">${rs(rec.rate)} / L</span></div>
-          <div class="slip-item"><span class="label">${t("slip.total")}</span><b class="num">${rs(total)}</b><span class="muted small">${ctx.fmtRange(per.from, per.to)}</span></div>
-          <div class="slip-item"><span class="label">${t("slip.payday")}</span><b>${ctx.fmtDate(per.payDay)}</b></div>
         </div>` : `<p class="muted">${t("phone.noRecord")}</p>`}
         <p class="note">${icon("volume")} ${t("phone.voiceNote")}${missing.size ? " " + t("phone.missingVoice", { langs: [...missing].map((l) => t("lang." + l)).join(", ") }) : ""}</p>
       </div>
@@ -67,25 +84,19 @@ export function render(ctx) {
 export function bind(ctx) {
   const { s } = ctx;
   const f = () => byId(s.farmers, ph.farmerId);
-  const recNow = () => ph.rec || latestRecord(s, ph.farmerId);
-  const payload = () => { const r = recNow(); const p = periodOf(r.day); return { name: f().name, session: r.session, litres: r.litres, quality: quality(r.fat, r.snf, s.settings), amount: r.amount, total: periodTotal(s, f().id, p.key), payDay: p.payDay }; };
-  const play = (kind) => {
-    if (!recNow()) return;
-    const lang = ph.lang || f().lang;
-    ph.screen = kind === "total" ? totalText(lang, payload()) : slipText(lang, payload());
-    ph.state = "playing"; ctx.rerender();
-    speak(ph.screen, lang, () => {});
-  };
-  $("#ph-farmer").onchange = (e) => { stop(); ph.farmerId = e.target.value; ph.rec = null; ph.state = "idle"; ctx.rerender(); };
-  $("#ph-missed").onclick = () => { stop(); ph.rec = null; ph.state = "menu"; ctx.rerender(); speak(menuText(), "ta"); };
+  const say = (text, lang) => { ph.screen = text; ph.last = { text, lang }; ph.state = "playing"; ctx.rerender(); speak(text, lang); };
+  const pay = (lang) => { const c = cycleInfo(s, f().id, lastClosed(s)); return payText(lang, { name: f().name, litres: c.litres, total: c.total, from: c.from, to: c.to, payDay: c.payDay, paid: !!c.paidOn }); };
+  const balance = (lang) => { const p = periodOf(todayIso()); return totalText(lang, { total: periodTotal(s, f().id, p.key), payDay: p.payDay }); };
+  $("#ph-farmer").onchange = (e) => { stop(); ph.farmerId = e.target.value; ph.state = "idle"; ctx.rerender(); };
+  $("#ph-pay").onclick = () => { stop(); ph.state = "ringing"; ctx.rerender(); };
+  $("#ph-missed").onclick = () => { stop(); ph.state = "menu"; ctx.rerender(); speak(menuText(), "ta"); };
   $$(".handset .key").forEach((b) => (b.onclick = () => {
     const k = b.dataset.key;
-    if (k === "end") { stop(); ph.state = ph.state === "idle" ? "idle" : "ended"; ph.rec = null; return ctx.rerender(); }
-    if (k === "answer" && ph.state === "ringing") { ph.lang = f().lang; return play("slip"); }
-    if (ph.state === "menu" && "1234".includes(k)) { ph.lang = VOICE_LANGS[Number(k) - 1]; return play("total"); }
-    if (ph.state === "playing" && k === "1") return play("slip");
-    if (ph.state === "playing" && k === "2") return play("total");
+    if (k === "end") { stop(); ph.state = ph.state === "idle" ? "idle" : "ended"; return ctx.rerender(); }
+    if (k === "answer" && ph.state === "ringing") return say(pay(f().lang), f().lang);
+    if (ph.state === "menu" && "1234".includes(k)) { const lang = VOICE_LANGS[Number(k) - 1]; return say(balance(lang), lang); }
+    if (ph.state === "playing" && k === "1" && ph.last) return say(ph.last.text, ph.last.lang);
+    if (ph.state === "playing" && k === "2") return say(balance(ph.last ? ph.last.lang : f().lang), ph.last ? ph.last.lang : f().lang);
   }));
 }
 export const phoneState = ph;
-export { SLIP };

@@ -1,7 +1,8 @@
-/* Layout: app shell with a top bar, a left rail on wide screens and a bottom tab bar on phones.
+/* Light theme only, by choice: the app is used on shared laptops and phones and should look the same everywhere.
+   Layout: app shell with a top bar, a left rail on wide screens and a bottom tab bar on phones.
    Palette: hill-forest green ink on a cool milk-white ground, marigold for "needs action". */
 :root {
-  --bg: #f3f6f3; --surface: #ffffff; --surface-2: #eef3ef; --line: #dbe3dc; --ink: #14302a; --muted: #5a6e66;
+  --bg: #f8faf8; --surface: #ffffff; --surface-2: #f0f4f1; --line: #dbe3dc; --ink: #14302a; --muted: #5a6e66;
   --accent: #1d6b52; --accent-ink: #ffffff; --accent-soft: #e1efe8; --marigold: #c98200; --marigold-soft: #fbf0d9;
   --good: #23784a; --good-soft: #e3f2e8; --warn: #a86a00; --warn-soft: #fbefd6; --bad: #b23a2b; --bad-soft: #f9e3df;
   --handset: #1e2a26; --handset-key: #2c3a35; --lcd: #dfe9d3; --lcd-ink: #26351f;
@@ -9,20 +10,10 @@
   --font-body: "Noto Sans", "Noto Sans Tamil", "Noto Sans Malayalam", "Noto Sans Devanagari", system-ui, sans-serif;
   --r: 12px; --shadow: 0 1px 2px rgba(20, 48, 42, .06), 0 4px 16px rgba(20, 48, 42, .05);
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0e1714; --surface: #15211d; --surface-2: #1b2a25; --line: #263a33; --ink: #e4eee8; --muted: #9bb1a7;
-  --accent: #4fb38a; --accent-ink: #08130f; --accent-soft: #1d3a2f; --marigold: #f0b23a; --marigold-soft: #3a2e14;
-  --good: #5fc48a; --good-soft: #193628; --warn: #f0b23a; --warn-soft: #3a2e14; --bad: #f08573; --bad-soft: #3d1f1a;
-  --handset: #0b1210; --handset-key: #22302b; --lcd: #c9d8bd; --lcd-ink: #1f2c19; --shadow: 0 1px 2px rgba(0,0,0,.4); color-scheme: dark; } }
-:root[data-theme="dark"] {
-  --bg: #0e1714; --surface: #15211d; --surface-2: #1b2a25; --line: #263a33; --ink: #e4eee8; --muted: #9bb1a7;
-  --accent: #4fb38a; --accent-ink: #08130f; --accent-soft: #1d3a2f; --marigold: #f0b23a; --marigold-soft: #3a2e14;
-  --good: #5fc48a; --good-soft: #193628; --warn: #f0b23a; --warn-soft: #3a2e14; --bad: #f08573; --bad-soft: #3d1f1a;
-  --handset: #0b1210; --handset-key: #22302b; --lcd: #c9d8bd; --lcd-ink: #1f2c19; --shadow: 0 1px 2px rgba(0,0,0,.4); color-scheme: dark; }
-
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; }
+html { color-scheme: light; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); -webkit-font-smoothing: antialiased; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--surface); }
 h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
@@ -128,6 +119,7 @@ table.mini td, table.mini th { padding: 6px 8px; }
 .key.call { background: #2f8a55; width: 84px; } .key.endk { background: #b2442f; width: 84px; }
 .key.hot { box-shadow: 0 0 0 3px var(--marigold); }
 .steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.slip-text { background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; max-height: none; color: var(--ink); }
 .slip { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
 .slip-item { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 4px; background: var(--surface-2); }
 .slip-item b { font-size: 1.25rem; font-family: var(--font-display); }
