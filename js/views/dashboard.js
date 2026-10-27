@@ -5,8 +5,7 @@ import { rs } from "../pricing.js";
 
 function chart(ctx, d) {
   const W = 640, H = 230, L = 40, R = 12, T = 14, B = 26;
-  const BE = 122; // break-even volume from the unit economics (DPR-05/06)
-  const max = Math.max(BE, ...d.perDay.map((x) => x.litres)) * 1.15;
+  const max = Math.max(20, ...d.perDay.map((x) => x.litres)) * 1.15;
   const step = max > 400 ? 100 : max > 150 ? 50 : 20;
   const y = (v) => T + (H - T - B) * (1 - v / max);
   const bw = (W - L - R) / d.perDay.length;
@@ -16,9 +15,22 @@ function chart(ctx, d) {
     ${d.perDay.map((p, i) => { const isToday = i === d.perDay.length - 1; const x = L + i * bw + bw * 0.18, h = H - B - y(p.litres);
       return `<rect x="${x}" y="${y(p.litres)}" width="${bw * 0.64}" height="${Math.max(0, h)}" rx="3" class="${isToday ? "bar today" : "bar"}"><title>${ctx.fmtDate(p.day)}: ${p.litres.toFixed(1)} L</title></rect>
         ${i % 2 === 1 || isToday ? `<text x="${x + bw * 0.32}" y="${H - 8}" text-anchor="middle" class="axis">${isToday ? ctx.t("dash.today") : Number(p.day.slice(8))}</text>` : ""}`; }).join("")}
-    <line x1="${L}" x2="${W - R}" y1="${y(BE)}" y2="${y(BE)}" class="be"/>
-    <text x="${W - R - 4}" y="${y(BE) - 6}" text-anchor="end" class="be-label">${ctx.t("dash.breakeven", { n: BE })}</text>
   </svg>`;
+}
+
+
+// Break-even shown as progress, not as a line the daily bars can never reach.
+const BREAK_EVEN = 112; // L/day: co-packing, Rs 100 to farmers, Rs 150 to households (DPR-07, 27 Oct)
+function progress(ctx, d) {
+  const { t } = ctx;
+  const last7 = d.perDay.slice(-8, -1); const avg7 = last7.reduce((a, x) => a + x.litres, 0) / Math.max(1, last7.length);
+  const pct = Math.min(100, Math.round((avg7 / BREAK_EVEN) * 100));
+  const gap = Math.max(0, BREAK_EVEN - avg7);
+  return `<div class="panel"><div class="row between"><h2>${t("dash.beTitle")}</h2><b class="num">${pct}%</b></div>
+    <div class="meter" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${t("dash.beTitle")}"><span style="width:${pct}%"></span></div>
+    <p class="small">${t("dash.beBody", { avg: avg7.toFixed(0), be: BREAK_EVEN })}</p>
+    ${gap > 0 ? `<p class="muted small">${t("dash.beGap", { n: gap.toFixed(0), cows: Math.ceil(gap / 2) })}</p>` : `<p class="small">${t("dash.beDone")}</p>`}
+  </div>`;
 }
 
 export function render(ctx) {
@@ -36,10 +48,13 @@ export function render(ctx) {
   <div class="grid-2">
     <div class="panel"><div class="row between"><h2>${t("dash.chartTitle")}</h2><span class="muted small">${t("dash.chartUnit")}</span></div>${chart(ctx, d)}
       <p class="muted small">${t("dash.chartNote")}</p></div>
+    <div class="stack">
+    ${progress(ctx, d)}
     <div class="panel"><h2>${t("dash.attention")}</h2>
       ${d.attention.length ? `<ul class="alerts">${d.attention.map((a) => `<li class="alert ${a.level}"><span class="dot"></span><span>${a.kind === "stopped"
         ? t("dash.stopped", { name: esc(a.farmer.name), village: esc(villageName(s, a.farmer.villageId)), d: ctx.fmtDate(a.since) })
         : t("dash.unpaid", { name: esc(a.farmer.name), amt: rs(a.amount) })}</span></li>`).join("")}</ul>` : `<p class="muted">${t("dash.allClear")}</p>`}
+    </div>
     </div>
   </div>
   <div class="panel"><h2>${t("dash.villages")}</h2>
