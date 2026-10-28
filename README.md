@@ -11,9 +11,9 @@ Many families who will supply milk cannot read, and many do not have smartphones
 | Screen | Who uses it | What it shows |
 |---|---|---|
 | Collection | Collection volunteer | Tap the member, set litres, fat and SNF, save. The slip is read aloud on the spot in the member's language |
-| Dashboard | CTRD, dairy company | Milk per day, progress to the company's break-even volume, quality by village, members who stopped pouring, payments by 10-day cycle |
+| Dashboard | CTRD, dairy company | Milk per day, progress to the company's break-even volume, quality by village, members who stopped pouring, payments by 10-day cycle with a copyable unpaid list for bank or UPI transfers |
 | Farmers | CTRD admin | Add, edit, remove (keeps history), restore or delete farmers; manage villages |
-| Settings | CTRD admin | Price rule, PINs, where the data is kept, activity log |
+| Settings | CTRD admin | Price rule, break-even volume, PINs, where the data is kept, activity log |
 | Farmer's line | Members | The 10-day payment call and the missed-call balance line on a basic keypad phone |
 
 The interface switches between English, Tamil, Malayalam and Hindi on every screen.
@@ -26,7 +26,7 @@ The interface switches between English, Tamil, Malayalam and Hindi on every scre
 
 ```
 index.html            app shell (GitHub Pages serves this)
-css/app.css           design tokens, light and dark themes
+css/app.css           design tokens (light theme)
 js/app.js             navigation, language, sign-in
 js/i18n.js            all interface text in four languages
 js/voice.js           spoken slip text and speech

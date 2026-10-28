@@ -15,12 +15,13 @@ export function render(ctx) {
           <label class="field grow"><span>${t("set.base")}</span><input id="p-base" name="basePrice" type="number" step="0.5" min="0" value="${p.basePrice}" ${admin ? "" : "disabled"}></label>
           <label class="field grow"><span>${t("set.fatStep")}</span><input id="p-fat" name="fatStep" type="number" step="0.1" min="0" value="${p.fatStep}" ${admin ? "" : "disabled"}></label>
           <label class="field grow"><span>${t("set.snfStep")}</span><input id="p-snf" name="snfStep" type="number" step="0.1" min="0" value="${p.snfStep}" ${admin ? "" : "disabled"}></label>
+          <label class="field grow"><span>${t("set.breakEven")}</span><input id="p-be" name="breakEven" type="number" step="1" min="1" value="${p.breakEven || 160}" ${admin ? "" : "disabled"}></label>
         </div>
         ${admin ? `<button class="btn primary" type="submit">${t("btn.save")}</button>` : ""}
       </form>
       <table class="mini"><thead><tr><th>${t("col.fat")}</th><th>SNF %</th><th class="r">${t("collect.rate")}</th></tr></thead>
       <tbody>${ex.map(([f, n]) => `<tr><td class="num">${f.toFixed(1)}</td><td class="num">${n.toFixed(1)}</td><td class="r num">${rs(rateFor(f, n, p))} / L</td></tr>`).join("")}</tbody></table>
-      <p class="muted small">${t("set.priceNote")}</p>
+      <p class="muted small">${t("set.priceNote")} ${t("set.breakEvenNote")}</p>
     </div>
     <div class="stack">
       <div class="panel"><h2>${t("set.access")}</h2>
@@ -48,7 +49,7 @@ export function bind(ctx) {
   const { t, store } = ctx; if (!ctx.can("admin")) return;
   $("#price-form").onsubmit = async (e) => {
     e.preventDefault(); const d = Object.fromEntries(new FormData(e.target));
-    const v = { basePrice: Number(d.basePrice), fatStep: Number(d.fatStep), snfStep: Number(d.snfStep) };
+    const v = { basePrice: Number(d.basePrice), fatStep: Number(d.fatStep), snfStep: Number(d.snfStep), breakEven: Number(d.breakEven) };
     if (Object.values(v).some((x) => !isFinite(x) || x < 0)) return toast(t("set.errPrice"), "bad");
     await store.setSettings(v); toast(t("set.priceSaved", { p: v.basePrice })); ctx.rerender();
   };

@@ -24,7 +24,7 @@ create table if not exists records (
   by uuid default auth.uid(), created_at timestamptz default now()
 );
 create table if not exists payments (period_key text not null, farmer_id uuid not null references farmers on delete cascade, paid_on date not null, primary key (period_key, farmer_id));
-create table if not exists settings (id int primary key default 1 check (id = 1), base_price numeric not null default 100, fat_step numeric not null default 1, snf_step numeric not null default 0.5, ref_fat numeric not null default 4.0, ref_snf numeric not null default 8.5);
+create table if not exists settings (id int primary key default 1 check (id = 1), base_price numeric not null default 100, fat_step numeric not null default 1, snf_step numeric not null default 0.5, ref_fat numeric not null default 4.0, ref_snf numeric not null default 8.5, break_even numeric not null default 160);
 insert into settings (id) values (1) on conflict do nothing;
 create table if not exists audit (id bigserial primary key, ts timestamptz not null default now(), who text, action text, detail text);
 

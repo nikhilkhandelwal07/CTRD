@@ -20,8 +20,9 @@ function chart(ctx, d) {
 
 
 // Break-even shown as progress, not as a line the daily bars can never reach.
-const BREAK_EVEN = 112; // L/day: co-packing, Rs 100 to farmers, Rs 150 to households (DPR-07, 27 Oct)
+// Break-even litres a day are set by the admin in Settings (default 160: DPR-07 base case incl. CEO and accountant).
 function progress(ctx, d) {
+  const BREAK_EVEN = Number(ctx.s.settings.breakEven) || 160;
   const { t } = ctx;
   const last7 = d.perDay.slice(-8, -1); const avg7 = last7.reduce((a, x) => a + x.litres, 0) / Math.max(1, last7.length);
   const pct = Math.min(100, Math.round((avg7 / BREAK_EVEN) * 100));
@@ -79,8 +80,18 @@ export function bind(ctx) {
     await dialog(`<h2 class="dlg-title">${t("dash.manageTitle")}</h2>
       <div class="table-wrap dlg-scroll"><table><thead><tr><th>${t("col.farmer")}</th><th class="r">${t("col.amount")}</th><th>${t("col.status")}</th></tr></thead><tbody>
       ${rows.map((x) => `<tr><td>${esc(x.f.name)}</td><td class="r num">${rs(x.amt)}</td><td><label class="switch"><input type="checkbox" data-pay="${x.f.id}" ${x.paid ? "checked" : ""}> <span>${t("dash.paid")}</span></label></td></tr>`).join("")}
-      </tbody></table></div><div class="dlg-actions"><button class="btn primary" data-close="done">${t("btn.done")}</button></div>`, {
-      onOpen: (box) => box.querySelectorAll("[data-pay]").forEach((c) => (c.onchange = async () => { await ctx.store.setPaid(key, c.dataset.pay, c.checked); toast(t("dash.payUpdated")); })),
+      </tbody></table></div>
+      <p class="muted small">${t("dash.copyHint")}</p>
+      <div class="dlg-actions"><button class="btn ghost" id="copy-list">${t("dash.copyList")}</button><button class="btn primary" data-close="done">${t("btn.done")}</button></div>`, {
+      onOpen: (box) => {
+        box.querySelectorAll("[data-pay]").forEach((c) => (c.onchange = async () => { await ctx.store.setPaid(key, c.dataset.pay, c.checked); toast(t("dash.payUpdated")); }));
+        box.querySelector("#copy-list").onclick = async () => {
+          const unpaid = rows.filter((x) => !s.payments[key + "|" + x.f.id]);
+          const text = ["Name\tVillage\tPhone\tAmount (Rs)"].concat(unpaid.map((x) => [x.f.name, villageName(s, x.f.villageId), x.f.phone || "", Math.round(x.amt)].join("\t"))).join("\n");
+          try { await navigator.clipboard.writeText(text); toast(t("dash.copied", { n: unpaid.length })); }
+          catch (e) { const ta = document.createElement("textarea"); ta.value = text; ta.className = "copy-box"; box.appendChild(ta); ta.select(); toast(t("dash.copyFail"), "bad"); }
+        };
+      },
     });
     ctx.rerender();
   }));
