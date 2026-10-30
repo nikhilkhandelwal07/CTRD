@@ -78,10 +78,16 @@ export function render(ctx) {
 
 export function bind(ctx) {
   const { s, t } = ctx;
-  const dl = $("#dl-monthly"); if (dl) dl.onclick = () => {
+  const dl = $("#dl-monthly"); if (dl) dl.onclick = async () => {
     const rows = monthlySummary(s);
     const csv = ["Month,Litres,Litres per day,Members pouring,Avg fat %,Avg SNF %,Paid to farmers (Rs),Avg price per litre (Rs),Paid on time share"]
       .concat(rows.map((m) => [m.month, m.litres.toFixed(1), m.perDay.toFixed(1), m.members, m.fat.toFixed(2), m.snf.toFixed(2), Math.round(m.paidTo), m.pricePerL.toFixed(2), m.paidShare === null ? "" : m.paidShare.toFixed(2)].join(","))).join("\n");
+    // Inside a claude.ai artifact, saves go through the downloads capability; elsewhere a normal browser download.
+    const host = window.claude && window.claude.use ? await window.claude.use("downloads").catch(() => null) : null;
+    if (host) {
+      try { await host.save({ filename: "milk_monthly_indicators.csv", data: csv }); toast(t("dash.downloaded")); } catch (e) { if (e && e.code !== "declined") toast(t("dash.copyFail"), "bad"); }
+      return;
+    }
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "milk_monthly_indicators.csv"; document.body.appendChild(a); a.click(); a.remove();
     toast(t("dash.downloaded"));
   };
