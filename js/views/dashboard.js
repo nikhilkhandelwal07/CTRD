@@ -1,6 +1,6 @@
 // Dashboard for CTRD and the dairy company.
 import { esc, icon, $, $$, dialog, toast } from "../ui.js";
-import { dashboard, villageName, periodTotal, byId } from "../calc.js";
+import { dashboard, villageName, periodTotal, byId, monthlySummary } from "../calc.js";
 import { rs } from "../pricing.js";
 
 function chart(ctx, d) {
@@ -58,6 +58,11 @@ export function render(ctx) {
     </div>
     </div>
   </div>
+  <div class="panel"><div class="row between"><h2>${t("dash.monthly")}</h2><button class="btn small ghost" id="dl-monthly">${t("dash.download")}</button></div>
+    <p class="muted small">${t("dash.monthlyNote")}</p>
+    <div class="table-wrap"><table><thead><tr><th>${t("dash.month")}</th><th class="r">${t("dash.lpd")}</th><th class="r">${t("col.farmers")}</th><th class="r">${t("col.fat")}</th><th class="r">SNF %</th><th class="r">${t("dash.avgPrice")}</th><th class="r">${t("dash.onTime")}</th></tr></thead>
+    <tbody>${monthlySummary(s).slice(-6).reverse().map((m) => `<tr><td>${m.month}</td><td class="r num">${m.perDay.toFixed(1)}</td><td class="r num">${m.members}</td><td class="r num">${m.fat.toFixed(1)}</td><td class="r num">${m.snf.toFixed(1)}</td><td class="r num">${rs(m.pricePerL)}</td><td class="r num">${m.paidShare === null ? "–" : Math.round(m.paidShare * 100) + "%"}</td></tr>`).join("")}</tbody></table></div>
+  </div>
   <div class="panel"><h2>${t("dash.villages")}</h2>
     <div class="table-wrap"><table><thead><tr><th>${t("col.village")}</th><th class="r">${t("col.farmers")}</th><th class="r">${t("col.lpd")}</th><th class="r">${t("col.fat")}</th><th class="r">SNF %</th><th>${t("slip.quality")}</th></tr></thead>
     <tbody>${d.villages.map((v) => `<tr><td>${esc(v.v.name)}</td><td class="r num">${v.farmers}</td><td class="r num">${v.litresPerDay.toFixed(1)}</td><td class="r num">${v.fat ? v.fat.toFixed(1) : "–"}</td><td class="r num">${v.snf ? v.snf.toFixed(1) : "–"}</td><td>${v.q ? `<span class="pill q-${v.q}">${t("q." + v.q)}</span>` : "–"}</td></tr>`).join("")}</tbody></table></div>
@@ -73,6 +78,13 @@ export function render(ctx) {
 
 export function bind(ctx) {
   const { s, t } = ctx;
+  const dl = $("#dl-monthly"); if (dl) dl.onclick = () => {
+    const rows = monthlySummary(s);
+    const csv = ["Month,Litres,Litres per day,Members pouring,Avg fat %,Avg SNF %,Paid to farmers (Rs),Avg price per litre (Rs),Paid on time share"]
+      .concat(rows.map((m) => [m.month, m.litres.toFixed(1), m.perDay.toFixed(1), m.members, m.fat.toFixed(2), m.snf.toFixed(2), Math.round(m.paidTo), m.pricePerL.toFixed(2), m.paidShare === null ? "" : m.paidShare.toFixed(2)].join(","))).join("\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" })); a.download = "milk_monthly_indicators.csv"; document.body.appendChild(a); a.click(); a.remove();
+    toast(t("dash.downloaded"));
+  };
   $$("[data-period]").forEach((b) => (b.onclick = async () => {
     const key = b.dataset.period;
     const fids = [...new Set(s.records.filter((r) => r.day && ctx.periodKey(r.day) === key).map((r) => r.farmerId))];

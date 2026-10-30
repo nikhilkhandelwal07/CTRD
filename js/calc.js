@@ -16,6 +16,26 @@ export function periodTotal(s, farmerId, key) {
 }
 export const avg = (rows, k) => (rows.length ? rows.reduce((a, r) => a + r[k], 0) / rows.length : 0);
 
+// Monthly indicators for monitoring (DPR-10): one row per calendar month.
+export function monthlySummary(s) {
+  const months = [...new Set(s.records.map((r) => r.day.slice(0, 7)))].sort();
+  return months.map((m) => {
+    const recs = s.records.filter((r) => r.day.slice(0, 7) === m);
+    const days = new Set(recs.map((r) => r.day)).size || 1;
+    const litres = recs.reduce((a, r) => a + r.litres, 0);
+    const paidTo = recs.reduce((a, r) => a + r.amount, 0);
+    const members = new Set(recs.map((r) => r.farmerId));
+    const open = periodOf(todayIso()).key;
+    const keys = [...new Set(recs.map((r) => periodOf(r.day).key))].filter((k) => k !== open);
+    let owed = 0, paid = 0;
+    for (const k of keys) for (const id of members) {
+      const t = periodTotal(s, id, k); if (t > 0) { owed++; if (s.payments[k + "|" + id]) paid++; }
+    }
+    return { month: m, litres, perDay: litres / days, members: members.size, fat: avg(recs, "fat"), snf: avg(recs, "snf"),
+      paidTo, pricePerL: litres ? paidTo / litres : 0, paidShare: owed ? paid / owed : null };
+  });
+}
+
 export function dashboard(s) {
   const today = todayIso();
   const days = []; for (let k = 13; k >= 0; k--) days.push(new Date(Date.parse(today) - k * 86400000).toISOString().slice(0, 10));
