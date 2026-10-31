@@ -4,7 +4,7 @@
 import { CONFIG } from "./config.js";
 import { makeSeed } from "./seed.js";
 
-const KEY = "palamalai-milk-slip-v4";
+const KEY = "palamalai-milk-slip-v5";
 const uid = (p) => p + Math.random().toString(36).slice(2, 9);
 
 async function sha256(text) {

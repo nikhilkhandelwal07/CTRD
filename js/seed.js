@@ -41,7 +41,7 @@ export function makeSeed() {
   const closed = [...new Set(records.map((r) => periodOf(r.day).key))].filter((k) => k < cur).sort();
   closed.forEach((k, i) => farmers.forEach((f) => {
     if (i === closed.length - 1 && (f.id === "f7" || f.id === "f18")) return;
-    payments[k + "|" + f.id] = closed.length ? periodOf(k.slice(0, 7) + "-" + ["05", "15", "25"][Number(k.slice(-1)) - 1]).payDay : null;
+    payments[k + "|" + f.id] = periodOf(k.slice(0, 10)).payDay;
   }));
   return {
     villages, farmers, records, payments,

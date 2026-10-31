@@ -39,7 +39,7 @@ export function totalText(lang, { total, payDay }) {
   return L.total({ t: Math.round(total), month: MONTHS[lang][m - 1], d });
 }
 
-// 10-day payment call: one call per member per pay cycle with the total and the payment.
+// Weekly payment call: one call per member each Saturday with the week's total and the payment.
 const PAY = {
   en: { day: (d, m) => `${d} ${m}`, text: (o) => `Hello ${o.name}. This is Palamalai Dairy. From ${o.from} to ${o.to}, you poured ${o.l} litres of milk. Your amount is ${o.t} rupees. ${o.paid ? "It has been paid into your bank account." : `It will be paid into your bank account on ${o.pay}.`} Thank you.` },
   ta: { day: (d, m) => `${m} ${d}`, text: (o) => `வணக்கம் ${o.name}. இது பாலமலை பால் பண்ணை. ${o.from} முதல் ${o.to} வரை நீங்கள் ${o.l} லிட்டர் பால் கொடுத்தீர்கள். உங்கள் தொகை ${o.t} ரூபாய். ${o.paid ? "இது உங்கள் வங்கிக் கணக்கில் செலுத்தப்பட்டது." : `இது ${o.pay} அன்று உங்கள் வங்கிக் கணக்கில் செலுத்தப்படும்.`} நன்றி.` },
